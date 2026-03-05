@@ -5,6 +5,9 @@ import { getPresignedUrl } from "./presign";
 
 const NAMESPACE = "searchable-whole-earth-page";
 
+const vec_threshold = 0.3; // thresholds need tested
+const bm25_threshold = 0.7;
+
 export type TurbopufferNamespace = ReturnType<Turbopuffer["namespace"]>;
 export type Bm25Promise = Promise<Awaited<ReturnType<TurbopufferNamespace["query"]>>>;
 
@@ -97,7 +100,7 @@ export async function hybridSearch(
 				r2_object_id: rowData.r2_object_id,
 			},
 		};
-	});
+	}).filter((i) => i.score <= vec_threshold);
 
 	const bm25Results = (bm25Response.rows ?? []).map((row) => {
 		const rowData = row as Record<string, unknown>;
@@ -111,7 +114,7 @@ export async function hybridSearch(
 				r2_object_id: rowData.r2_object_id,
 			},
 		};
-	});
+	}).filter((i) => i.score >= bm25_threshold);
 
 	const fused = reciprocalRankFusion(vectorResults, bm25Results);
 	const topResults = fused.slice(0, matchCount);
