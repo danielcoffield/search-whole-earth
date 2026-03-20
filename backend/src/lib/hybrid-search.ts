@@ -99,9 +99,7 @@ export async function hybridSearch(
 				r2_object_id: rowData.r2_object_id,
 			},
 		};
-	});
-
-	const thresholdVecResults = vectorResults.filter((i) => i.score <= vec_threshold);
+	}).filter((i) => i.score <= vec_threshold);
 
 	const bm25Results = (bm25Response.rows ?? []).map((row) => {
 		const rowData = row as Record<string, unknown>;
@@ -121,7 +119,7 @@ export async function hybridSearch(
 		return [];
 	}
 
-	const fused = reciprocalRankFusion(thresholdVecResults, bm25Results);
+	const fused = reciprocalRankFusion(vectorResults, bm25Results);
 	const topResults = fused.slice(0, matchCount);
 
 	const urlStart = performance.now();
